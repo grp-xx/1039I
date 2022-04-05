@@ -4,9 +4,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "sockaddress.hpp"
+#include <vector>
 
 
 namespace npl {
+
+typedef std::vector<char> buffer;
 
 template<int F, int type>
 class socket
@@ -97,6 +100,45 @@ public:
         return std::make_pair(std::move(accepted),peer);
 
     }
+
+    std::ptrdiff_t write(const buffer& buf) const
+    {
+        return ::write(m_sockfd, &buf[0], buf.size());
+    }
+
+    std::ptrdiff_t read(buffer& buf) const
+    {
+        return ::read(m_sockfd, &buf[0], buf.size());
+    }
+
+    buffer read(int len) const 
+    {
+        npl::buffer buf(len);
+        int n = this->read(buf);
+        return buffer(buf.begin(),buf.begin()+n);
+    }
+
+    std::ptrdiff_t
+    sendto(const buffer& buf, const sockaddress<F>& remote, int flags = 0) const
+    {
+        return ::sendto(m_sockfd, &buf[0], buf.size(), &remote.c_addr(), remote.len());
+    }
+
+    std::ptrdiff_t
+    recvfrom(buffer& buf, sockaddress<F>& remote, int flags = 0) const
+    {
+        return ::recvfrom(m_sockfd, &buf[0], buf.size(), &remote.c_addr(), &remote.len());
+    }
+
+    std::pair<buffer,sockaddress<F>> 
+    recvfrom(int len, int flags = 0) const
+    {
+        sockaddress<F> remote;
+        buffer buf(len);
+        int n = ::recvfrom(m_sockfd, &buf[0], buf.size(), &remote.c_addr(), &remote.len());
+        return std::make_pair(buffer(buf.begin(),buf.begin()+n),remote);
+    }
+
 
 
 
