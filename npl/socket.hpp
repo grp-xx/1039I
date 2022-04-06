@@ -36,7 +36,7 @@ public:
 
     socket& operator=(socket&& rhs) noexcept
     {
-        if (this != rhs)
+        if (this != &rhs)
         {
             this->close();
             m_sockfd = rhs.m_sockfd;
