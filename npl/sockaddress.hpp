@@ -28,8 +28,12 @@ public:
     : m_len(sizeof(sockaddr_un))
     {
         memset(&m_addr,0,sizeof(sockaddr_un));
-        m_addr.sun_family = AF_UNIX; 
-        strncpy(m_addr.sun_path,pathname.c_str(),sizeof(m_addr.sun_path) - 1);  
+        m_addr.sun_family = AF_UNIX;
+        ptrdiff_t offset = 0;
+        #ifdef __linux__
+        ++offset;
+        #endif 
+        strncpy(m_addr.sun_path+1,pathname.c_str(),sizeof(m_addr.sun_path) - 1);  
 
     }
 
