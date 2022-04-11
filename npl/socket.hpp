@@ -62,6 +62,9 @@ public:
 
     int bind(const sockaddress<F>& addr)
     {
+        if constexpr (F == AF_UNIX) {
+            unlink(addr.name().c_str());
+        }
         int out = ::bind(m_sockfd,&addr.c_addr(),addr.len());
         if (out == -1) {
             throw std::system_error(errno,std::system_category(),"bind");
@@ -121,7 +124,7 @@ public:
     std::ptrdiff_t
     sendto(const buffer& buf, const sockaddress<F>& remote, int flags = 0) const
     {
-        return ::sendto(m_sockfd, &buf[0], buf.size(), &remote.c_addr(), remote.len());
+        return ::sendto(m_sockfd, &buf[0], buf.size(), flags, &remote.c_addr(), remote.len());
     }
 
     std::ptrdiff_t
@@ -135,12 +138,9 @@ public:
     {
         sockaddress<F> remote;
         buffer buf(len);
-        int n = ::recvfrom(m_sockfd, &buf[0], buf.size(), &remote.c_addr(), &remote.len());
+        int n = ::recvfrom(m_sockfd, &buf[0], buf.size(), flags, &remote.c_addr(), &remote.len());
         return std::make_pair(buffer(buf.begin(),buf.begin()+n),remote);
     }
-
-
-
 
 };
 
