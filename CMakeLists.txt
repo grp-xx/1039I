@@ -6,6 +6,7 @@ include_directories(npl)
 add_executable(main src/main.cpp)
 add_executable(simpleServer src/simpleServer.cpp)
 add_executable(simpleClient src/simpleClient.cpp)
+add_executable(byteorder src/byteorder.cpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
