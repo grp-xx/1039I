@@ -29,18 +29,18 @@ int main(int argc, char** argv) {
 
     // SOCK_DGRAM
 
-    npl::socket<AF_UNIX, SOCK_DGRAM> sock;
+//    npl::socket<AF_UNIX, SOCK_DGRAM> sock;
+//    std::string servername = "/tmp/test";
+//    npl::sockaddress<AF_UNIX> srvAddr(servername);
 
-    std::string servername = "/tmp/test";
-
-    npl::sockaddress<AF_UNIX> srvAddr(servername);
-
+    npl::socket<AF_INET6, SOCK_DGRAM> sock;
+    npl::sockaddress<AF_INET6> srvAddr("",10000);
     sock.bind(srvAddr); 
 
     auto [buf, remote] = sock.recvfrom(80);
 
     std::cout << "Received: " << std::string(buf.begin(),buf.end()) << std::endl;
-    std::cout << "from: " << remote.name() << std::endl;
+    std::cout << "from: " << remote.host() << std::endl;
 
     sock.sendto(buf, remote);
 

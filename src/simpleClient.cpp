@@ -4,16 +4,15 @@
 
 int main(int argc, char** argv) {
 
-    npl::socket<AF_UNIX, SOCK_DGRAM> sock;
+//    npl::socket<AF_UNIX, SOCK_DGRAM> sock;
+//    std::string servername = "/tmp/test";
+//    npl::sockaddress<AF_UNIX> srvAddr(servername);
+//    npl::sockaddress<AF_UNIX> cliaddr(servername + "." + std::to_string(getpid()));
+//    sock.bind(cliaddr);
 
-    std::string servername = "/tmp/test";
 
-
-    npl::sockaddress<AF_UNIX> srvAddr(servername);
-    npl::sockaddress<AF_UNIX> cliaddr(servername + "." + std::to_string(getpid()));
-
-    sock.bind(cliaddr);
-
+    npl::socket<AF_INET6, SOCK_DGRAM> sock;
+    npl::sockaddress<AF_INET6> srvAddr("localhost",10000);
     std::string line;
 
     std::cout << "Ping: ";
