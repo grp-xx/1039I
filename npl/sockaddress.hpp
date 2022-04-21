@@ -1,12 +1,15 @@
 #ifndef _SOCKADDRESS_HPP_
 #define _SOCKADDRESS_HPP_
 
+#include <cstring>
+#include <string>
 #include <sys/socket.h> 
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <netdb.h>
+#include <system_error>
 
 namespace npl {
 
