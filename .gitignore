@@ -11,6 +11,7 @@ Dart*
 Testing
 share
 .idea/
+.cache/
 .vscode/
 .vagrant/
 .ssh*
