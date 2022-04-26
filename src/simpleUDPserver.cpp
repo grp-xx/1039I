@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <iostream>
 #include "socket.hpp"
 #include "sockaddress.hpp"
@@ -33,16 +34,22 @@ int main(int argc, char** argv) {
 //    std::string servername = "/tmp/test";
 //    npl::sockaddress<AF_UNIX> srvAddr(servername);
 
-    npl::socket<AF_INET6, SOCK_DGRAM> sock;
-    npl::sockaddress<AF_INET6> srvAddr("",10000);
-    sock.bind(srvAddr); 
+    npl::socket<AF_INET, SOCK_DGRAM> sock;
+    npl::sockaddress<AF_INET> srvAddr("",10000);
+    sock.bind(srvAddr);
 
-    auto [buf, remote] = sock.recvfrom(80);
+    std::cout << "Press any key to start" << std::endl;
+    std::getchar();
 
-    std::cout << "Received: " << std::string(buf.begin(),buf.end()) << std::endl;
-    std::cout << "from: " << remote.host() << std::endl;
+    for (;;) 
+    {
+        auto [buf, remote] = sock.recvfrom(2048);
+        std::cout << "Received: " << std::string(buf.begin(),buf.end()) << std::endl;
+        std::cout << "from: " << remote.host() << std::endl;
+        sock.sendto(buf, remote);
+    } 
 
-    sock.sendto(buf, remote);
+
 
     sock.close();
 

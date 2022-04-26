@@ -11,16 +11,18 @@ int main(int argc, char** argv) {
 //    sock.bind(cliaddr);
 
 
-    npl::socket<AF_INET6, SOCK_DGRAM> sock;
-    npl::sockaddress<AF_INET6> srvAddr("localhost",10000);
+    npl::socket<AF_INET, SOCK_DGRAM> sock;
+    npl::sockaddress<AF_INET> srvAddr("localhost",10000);
     std::string line;
 
-    std::cout << "Ping: ";
-    std::getline(std::cin, line);
-
-    sock.sendto(npl::buffer(line.begin(),line.end()), srvAddr);
-    auto [buf, remote] = sock.recvfrom(80);
-    std::cout << "Pong: " << std::string(buf.begin(),buf.end()) << std::endl;
+    for (;;)
+    {
+        std::cout << "Ping: ";
+        std::getline(std::cin, line);
+        sock.sendto(npl::buffer(line.begin(),line.end()), srvAddr);
+        // auto [buf, remote] = sock.recvfrom(80);
+        // std::cout << "Pong: " << std::string(buf.begin(),buf.end()) << std::endl;
+    }
 
     sock.close();
 

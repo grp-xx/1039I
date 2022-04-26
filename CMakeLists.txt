@@ -5,8 +5,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 include_directories(npl)
 
 add_executable(main src/main.cpp)
-add_executable(simpleServer src/simpleServer.cpp)
-add_executable(simpleClient src/simpleClient.cpp)
+add_executable(simpleUDPserver src/simpleUDPserver.cpp)
+add_executable(simpleTCPserver src/simpleTCPserver.cpp)
+add_executable(simpleTCPclient src/simpleTCPclient.cpp)
+add_executable(simpleUDPclient src/simpleUDPclient.cpp)
 add_executable(byteorder src/byteorder.cpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
