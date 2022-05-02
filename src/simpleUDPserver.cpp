@@ -38,8 +38,8 @@ int main(int argc, char** argv) {
     npl::sockaddress<AF_INET> srvAddr("",10000);
     sock.bind(srvAddr);
 
-    std::cout << "Press any key to start" << std::endl;
-    std::getchar();
+    // std::cout << "Press any key to start" << std::endl;
+    // std::getchar();
 
     for (;;) 
     {

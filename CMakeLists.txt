@@ -3,12 +3,15 @@ project(1039I)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 include_directories(npl)
-
+include_directories(nlohmann)
+        
 add_executable(main src/main.cpp)
 add_executable(simpleUDPserver src/simpleUDPserver.cpp)
 add_executable(simpleTCPserver src/simpleTCPserver.cpp)
+add_executable(simpleTCP-mt-server src/simpleTCP-mt-server.cpp)
 add_executable(simpleTCPclient src/simpleTCPclient.cpp)
 add_executable(simpleUDPclient src/simpleUDPclient.cpp)
+add_executable(simpleUDPclient-json src/simpleUDPclient-json.cpp)
 add_executable(byteorder src/byteorder.cpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
