@@ -60,6 +60,11 @@ public:
         }
     }
 
+   int shutdown(int how)
+    {
+        return ::shutdown(m_sockfd, how);
+    }
+
     int bind(const sockaddress<F>& addr)
     {
         if constexpr (F == AF_UNIX) {
@@ -109,6 +114,11 @@ public:
         return ::write(m_sockfd, &buf[0], buf.size());
     }
 
+    std::ptrdiff_t      send(const buffer& buf, int flags = 0) const
+    {
+       return ::send(m_sockfd, &buf[0], buf.size(), flags);
+    }
+
     std::ptrdiff_t read(buffer& buf) const
     {
         return ::read(m_sockfd, &buf[0], buf.size());
@@ -118,6 +128,18 @@ public:
     {
         npl::buffer buf(len);
         int n = this->read(buf);
+        return buffer(buf.begin(),buf.begin()+n);
+    }
+
+    std::ptrdiff_t      recv(buffer& buf, int flags = 0) const
+    {
+        return ::recv(m_sockfd, &buf[0], buf.size(), flags);
+    }
+
+    buffer              recv(int len, int flags = 0) const
+    {
+        buffer buf(len);
+        std::ptrdiff_t n = ::recv(m_sockfd, &buf[0], buf.size(), flags);
         return buffer(buf.begin(),buf.begin()+n);
     }
 
@@ -141,6 +163,65 @@ public:
         int n = ::recvfrom(m_sockfd, &buf[0], buf.size(), flags, &remote.c_addr(), &remote.len());
         return std::make_pair(buffer(buf.begin(),buf.begin()+n),remote);
     }
+
+    // Advanced socket methods (To be reviewed and made better possibly)
+
+    sockaddress<F> 
+    getsockname() const
+    {
+        sockaddress<F> name;
+        if (::getsockname(m_sockfd, &name.c_addr(), &name.len() ) !=0 ) {
+           throw std::system_error(errno,std::generic_category(),"getsockname");
+        }
+        return name;
+    }
+
+    sockaddress<F>
+    getpeername() const
+    {
+        sockaddress<F> name;
+        if (::getpeername(m_sockfd, &name.c_addr(), &name.len() ) !=0 ) {
+           throw std::system_error(errno,std::generic_category(),"getpeername");
+        }
+        return name;
+
+    }
+
+    int
+    setsockopt(int level, int optname, const void *optval, socklen_t optlen)
+    {
+        int out = ::setsockopt(m_sockfd, level, optname, optval, optlen);
+        if (out == -1) {
+            throw std::system_error(errno,std::generic_category(),"setsockopt");
+        }
+        return out;
+    }
+
+    int
+    getsockopt(int level, int optname, void *optval, socklen_t *optlen) const
+    {
+        int out = ::getsockopt(m_sockfd, level, optname, optval, optlen);
+        if (out == -1) {
+            throw std::system_error(errno,std::generic_category(),"getsockopt");
+        }
+        return out;
+    }
+
+    // Setting specific socket options
+
+    // Enable reusing TCP/UDP ddress
+    int
+    set_reuseaddr() 
+    {
+        int reuse = 1;
+        int out = ::setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+        if (out == -1) {
+            throw std::system_error(errno,std::generic_category(),"set_reuseaddr");
+        }
+        return out;
+    }
+
+
 
 };
 

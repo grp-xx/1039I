@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
     npl::socket<AF_INET, SOCK_STREAM> sock;
     npl::sockaddress<AF_INET> srvAddr("",10000);
     sock.bind(srvAddr);
+    sock.set_reuseaddr();
     sock.listen();
 
     // std::cout << "Press any key to start" << std::endl;
