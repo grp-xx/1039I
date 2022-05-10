@@ -7,6 +7,7 @@ include_directories(hdr)
 include_directories(nlohmann)
         
 add_executable(main src/main.cpp)
+add_executable(nl-sniff src/nl-sniff.cpp)
 add_executable(simpleUDPserver src/simpleUDPserver.cpp)
 add_executable(simpleTCPserver src/simpleTCPserver.cpp)
 add_executable(simpleTCP-mt-server src/simpleTCP-mt-server.cpp)

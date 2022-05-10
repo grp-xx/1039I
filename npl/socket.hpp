@@ -9,7 +9,7 @@
 
 namespace npl {
 
-typedef std::vector<char> buffer;
+typedef std::vector<u_char> buffer;
 
 template<int F, int type>
 class socket
