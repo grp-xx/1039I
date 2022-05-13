@@ -3,18 +3,17 @@
 #include "socket.hpp"
 #include "sockaddress.hpp"
 #include <netinet/ip.h>
-#include <net/ethernet.h>
 #include "pktheaders.hpp"
 
 
 int main(int argc, char** argv)
 {
-    npl::socket<AF_PACKET, SOCK_DGRAM> sock(ntohs(ETHERTYPE_IP));
+    npl::socket<AF_INET, SOCK_RAW> sock(IPPROTO_TCP);
 
 
     for (;;)
     {
-        npl::buffer buf = sock.read(65536);
+        auto [buf, from] = sock.recvfrom(65536);
 
 
         //const struct ip* ip_ptr = reinterpret_cast<const ip*>(&buf[0]);
