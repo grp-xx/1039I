@@ -4,12 +4,12 @@
 #include "sockaddress.hpp"
 #include <netinet/ip.h>
 #include <net/ethernet.h>
-#include "pktheaders.hpp"
+#include "headers.hpp"
 
 
 int main(int argc, char** argv)
 {
-    npl::socket<AF_PACKET, SOCK_DGRAM> sock(ntohs(ETHERTYPE_IP));
+    npl::socket<AF_INET, SOCK_RAW> sock(ntohs(ETHERTYPE_IP));
 
 
     for (;;)
