@@ -1,6 +1,5 @@
 #ifndef _HEADERS_HPP_
 #define _HEADERS_HPP_
-#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <net/if_arp.h>
@@ -52,7 +51,7 @@ namespace npl {
 
         pktheader(const u_char* ptr, ssize_t size) 
         {
-            if ( ( ptr != nullptr ) && ( size < sizeof(ether_header) ) ) {
+            if ( ( ptr == nullptr ) || ( size < sizeof(ether_header) ) ) {
                 throw ( std::system_error(errno,std::system_category(),"Packet fragment too short") );
             }
             c_header = *reinterpret_cast<const ether_header*>(ptr);
@@ -97,7 +96,7 @@ namespace npl {
 
         pktheader(const u_char* ptr, ssize_t size) 
         {
-            if ( (ptr != nullptr) && (size < sizeof(vlan_header)) ) {
+            if ( (ptr == nullptr) || (size < sizeof(vlan_header)) ) {
                 throw ( std::system_error(errno,std::system_category(),"Packet fragment too short") );
             }
             c_header = *reinterpret_cast<const vlan_header*>(ptr);
@@ -156,7 +155,7 @@ namespace npl {
 
         pktheader(const u_char* ptr, ssize_t size) 
         {
-            if ( (ptr!=nullptr) & (size < sizeof(arphdr))) {
+            if ( (ptr==nullptr) || (size < sizeof(arphdr))) {
                 throw ( std::system_error(errno,std::system_category(),"Packet fragment too short") );
             }
             c_header = *reinterpret_cast<const arphdr*>(ptr);
@@ -186,17 +185,12 @@ namespace npl {
 
         pktheader(const u_char* ptr, ssize_t size) 
         {
-            if ( (ptr != nullptr) & (size < sizeof(ip)) ) {
+            if ( (ptr == nullptr) || (size < sizeof(ip)) ) {
                 throw ( std::system_error(errno,std::system_category(),"Packet fragment too short") );
             }
             c_header = *reinterpret_cast<const ip*>(ptr);
         }
 
-        unsigned short
-        hlen() const
-        {
-            return c_header.ip_hl;
-        }
         unsigned short 
         version() const{
             return static_cast<unsigned short>(c_header.ip_v);
@@ -240,7 +234,7 @@ namespace npl {
 
         pktheader(const u_char* ptr, ssize_t size) 
         {
-            if ( (ptr != nullptr) && (size < sizeof(udphdr)) ) {
+            if ( (ptr == nullptr) || (size < sizeof(udphdr)) ) {
                 throw ( std::system_error(errno,std::system_category(),"Packet fragment too short") );
             }
             c_header = *reinterpret_cast<const udphdr*>(ptr);
@@ -278,7 +272,7 @@ namespace npl {
 
         pktheader(const u_char* ptr, ssize_t size) 
         {
-            if ( (ptr != nullptr) && (size < sizeof(tcphdr)) ) {
+            if ( (ptr == nullptr) || (size < sizeof(tcphdr)) ) {
                 throw ( std::system_error(errno,std::system_category(),"Packet fragment too short") );
             }
             c_header = *reinterpret_cast<const tcphdr*>(ptr);
@@ -311,11 +305,12 @@ namespace npl {
 
         pktheader(const u_char* ptr, ssize_t size) 
         {
-            if ( (ptr != nullptr) && (size < sizeof(icmp)) ) {
+            if ( (ptr == nullptr) || (size < sizeof(icmp)) ) {
                 throw ( std::system_error(errno,std::system_category(),"Packet fragment too short") );
             }
             c_header = *reinterpret_cast<const struct icmp*>(ptr);
         }
+
         unsigned short 
         type() const
         {
