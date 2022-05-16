@@ -20,6 +20,7 @@ add_executable(simpleUDPclient-json src/simpleUDPclient-json.cpp)
 add_executable(byteorder src/byteorder.cpp)
 target_link_libraries(UDProom -pthread)
 target_link_libraries(simpleTCP-mt-server -pthread)
+target_link_libraries(dl-sniff -pthread)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

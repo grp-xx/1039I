@@ -22,8 +22,8 @@ int main(int argc, char** argv)
 
         npl::pktheader<ipv4> ip_hdr(&buf[0],buf.size());
         std::cout << "Header length: " << ip_hdr.hlen() << " ";
-        // std::cout << "From " << ip_hdr.src() << " To: " << ip_hdr.dst() << std::endl;
-        std::cout << "From: " << from.host() << " Port: " << from.port() << std::endl;
+        std::cout << "From " << ip_hdr.src() << " To: " << ip_hdr.dst() << std::endl;
+        // std::cout << "From: " << from.host() << " Port: " << from.port() << std::endl;
         
 
 
