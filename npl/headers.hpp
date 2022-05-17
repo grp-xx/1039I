@@ -22,7 +22,7 @@ struct vlan_header {
     u_char    vlan_shost[ETHER_ADDR_LEN];
     u_int16_t vlan_tpid;
     u_int16_t vlan_id;
-    u_int16_t vlan_type;
+    u_int16_t type;
 };
 
 
@@ -106,7 +106,7 @@ namespace npl {
         unsigned short
         type() const
         {
-            return ntohs(c_header.vlan_type);
+            return ntohs(c_header.type);
         }       
 
         unsigned short
