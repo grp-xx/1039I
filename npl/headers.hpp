@@ -201,6 +201,11 @@ namespace npl {
             return static_cast<unsigned short>(c_header.ip_p);
         }
 
+        unsigned short 
+        hlen() const{
+            return static_cast<unsigned short>(c_header.ip_hl);
+        }
+        
         std::string 
         src() const
         {
