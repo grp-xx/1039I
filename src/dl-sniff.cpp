@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #include <iostream>
 #include <linux/if_ether.h>
 #include <net/ethernet.h>
@@ -56,3 +58,5 @@ int main(int argc, char** argv)
 
 
 }
+
+#endif
