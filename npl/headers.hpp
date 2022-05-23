@@ -314,6 +314,12 @@ public:
     {
         return static_cast<unsigned short>(chdr.ip_hl);
     }
+
+    unsigned short 
+    len() const
+    {
+        return static_cast<unsigned short>(chdr.ip_len);
+    }
     
     std::string 
     src() const
