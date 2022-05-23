@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
         //const struct ip* ip_ptr = reinterpret_cast<const ip*>(&buf[0]);
 
-        npl::pktheader<ipv4> ip_hdr(&buf[0],buf.size());
+        npl::header<hdr::ipv4> ip_hdr(&buf[0],buf.size());
         std::cout << "Header length: " << ip_hdr.hlen() << " ";
         std::cout << "From " << ip_hdr.src() << " To: " << ip_hdr.dst() << std::endl;
         // std::cout << "From: " << from.host() << " Port: " << from.port() << std::endl;
