@@ -20,123 +20,134 @@
 #include <sstream>
 #include "headers.hpp"
 
+
+enum class raw   {ether, vlan, arp, ipv4, ipv6, icmp, tcp, udp}; 
+enum class proto {unspec, ether, vlan, arp, ipv4, ipv6, icmp, tcp, udp}; 
+
 namespace npl {
 
-class frame {
+class frame{
+
 protected:
-    const struct ether_header*         m_ether = nullptr;
-    const struct vlan_header *          m_vlan = nullptr;
+
+    const struct ether_header*          m_ether = nullptr;
+    const struct vlan_header*           m_vlan = nullptr;
     const struct arphdr*                m_arp  = nullptr;
     const struct ip*                    m_ipv4 = nullptr; 
     const struct icmp*                  m_icmp = nullptr; 
     const struct tcphdr*                m_tcp  = nullptr; 
-    const struct udphdr*                m_udp  = nullptr; 
+    const struct udphdr*                m_udp  =  nullptr; 
+    // const u_char*                    m_app  = nullptr; 
 
 
-public:
-    frame()
-    {};
+public: 
+    frame(){};
+    frame (const u_char* raw, ssize_t caplen)
+    {
 
-    frame(const u_char* raw, ssize_t caplen)
-    {   
-        if (caplen < sizeof(ether_header)) {
+        // Assume hardware is ethernet
+        // Select Ethernet/Vlan
+
+        if ( caplen < sizeof(ether_header) ) {
             return;
         }
-
+        
+        
         m_ether = reinterpret_cast<const ether_header*>(raw);
 
-        if (m_ether->ether_type == htons(ETHERTYPE_VLAN))  // VLAN detected
+        if (m_ether->ether_type == htons(ETHERTYPE_VLAN))  // VLAN header detected
         {
-            if (caplen < sizeof(vlan_header)) {
+            if (caplen <= sizeof(vlan_header)) {
                 return;
-            }
+            } 
             m_vlan = reinterpret_cast<const vlan_header*>(raw);
-            m_ether = nullptr;
         }
 
-        // Parse L2 header
+        // Parse L2 header (find out which is the layer 3)
 
-        if ( m_vlan != nullptr)  // Frame has vlan header 
+
+        if ( m_vlan != nullptr )      // Frame has vlan header
         {
-            caplen -= sizeof(vlan_header); // bytes available at layer > 2
-
-            if ( m_vlan->type == htons(ETHERTYPE_ARP)) 
+            
+            caplen -= sizeof(vlan_header);
+            
+            if ( m_vlan->type == htons(ETHERTYPE_ARP) ) 
             {
-                if ( caplen >= sizeof(arphdr) )
+                if (caplen >= sizeof(arphdr))
                 {
                     m_arp = reinterpret_cast<const arphdr*>(m_vlan+1);
-                }
-
+                } 
             }
-            if ( m_vlan->type == htons(ETHERTYPE_IP)) 
+
+            if ( m_vlan->type == htons(ETHERTYPE_IP) )   
             {
-                if ( caplen >= sizeof(ip) )
+                if (caplen >= sizeof(ip))
                 {
                     m_ipv4 = reinterpret_cast<const ip*>(m_vlan+1);
                 }
-                
-            }
-        }
-        else       // Frame is regular ethernet header
-        {
-            caplen -= sizeof(ether_header); // bytes available at layer > 2
+            }         
 
-            if ( m_ether->ether_type == htons(ETHERTYPE_ARP)) 
+        }
+        else    // Regular ethernet header
+        {
+            caplen -= sizeof(ether_header);
+            if ( m_ether->ether_type == htons(ETHERTYPE_ARP) ) 
             {
-                if ( caplen >= sizeof(arphdr) )
+                if (caplen >= sizeof(arphdr))
                 {
                     m_arp = reinterpret_cast<const arphdr*>(m_ether+1);
-                }
-
+                } 
             }
-            if ( m_ether->ether_type == htons(ETHERTYPE_IP)) 
+
+            if ( m_ether->ether_type == htons(ETHERTYPE_IP) )   
             {
-                if ( caplen >= sizeof(ip) )
+                if (caplen >= sizeof(ip))
                 {
                     m_ipv4 = reinterpret_cast<const ip*>(m_ether+1);
                 }
-                
-            }
+            }         
         }
 
-        // Parse L3 headers
 
-        if (m_ipv4 != nullptr)     // Frame carries an IP Packet
+        // Parse L3 header
+        // Basically... only IPv4
+
+        if (m_ipv4 != nullptr) 
         {
             ssize_t ip_hl = (m_ipv4->ip_hl)*4;
+            const u_char* ip4_ptr = reinterpret_cast<const u_char*>(m_ipv4);
             caplen -= ip_hl;
-            const u_char* ipv4_ptr = reinterpret_cast<const u_char*>(m_ipv4);
 
-            if (m_ipv4->ip_p == IPPROTO_ICMP)
+            if (m_ipv4->ip_p == IPPROTO_ICMP) 
             {
-                if (caplen >= sizeof(struct icmp))
+                if (caplen >= sizeof(icmp))
                 {
-                    m_icmp = reinterpret_cast<const struct icmp*>(ipv4_ptr + ip_hl);
+                    m_icmp = reinterpret_cast<const struct icmp*>(ip4_ptr+ip_hl);
+                }
+            }
+
+            if (m_ipv4->ip_p == IPPROTO_UDP) 
+            {
+                if (caplen >= sizeof(udphdr))
+                {
+                    m_udp = reinterpret_cast<const udphdr*>(ip4_ptr+ip_hl);
                 }
 
             }
 
-            if (m_ipv4->ip_p == IPPROTO_UDP)
+            if (m_ipv4->ip_p == IPPROTO_TCP) 
             {
-                if (caplen >= sizeof(struct udphdr))
+                if (caplen >= sizeof(udphdr))
                 {
-                    m_udp = reinterpret_cast<const struct udphdr*>(ipv4_ptr + ip_hl);
+                    m_tcp = reinterpret_cast<const tcphdr*>(ip4_ptr+ip_hl);
                 }
             }
 
-            if (m_ipv4->ip_p == IPPROTO_TCP)
-            {
-                if (caplen >= sizeof(struct tcphdr))
-                {
-                    m_tcp = reinterpret_cast<const struct tcphdr*>(ipv4_ptr + ip_hl);
-                }
-            }
-
+        // Parse L4 header
+        // dhcp, dns, ...
         }
-
-        // Parse L4 Header looking for DNS, DHCP, HTTP(S)
-
-    }
+        
+    }  // End Ctor
 
 
     frame  (frame const& rhs) = default;
@@ -146,168 +157,54 @@ public:
     ~frame() = default;
 
 
-    // Get pointers to header
-    // Methods that return the raw pointer to C headers
+    // Methods that return the raw pointer to portions of packets 
 
-    template <Proto hdr>
-    auto get() const;
-
+    template<raw p>
+    const u_char* get() const
+    {
+        if constexpr ( p == raw::ether) return reinterpret_cast<const u_char*>(m_ether);
+        if constexpr ( p == raw::vlan ) return reinterpret_cast<const u_char*>(m_vlan);
+        if constexpr ( p == raw::arp  ) return reinterpret_cast<const u_char*>(m_arp);
+        if constexpr ( p == raw::ipv4 ) return reinterpret_cast<const u_char*>(m_ipv4);
+        if constexpr ( p == raw::icmp ) return reinterpret_cast<const u_char*>(m_icmp);
+        if constexpr ( p == raw::udp  ) return reinterpret_cast<const u_char*>(m_udp);
+        if constexpr ( p == raw::tcp  ) return reinterpret_cast<const u_char*>(m_tcp);
+    }
+    
     // Methods that return C++ headers provided in file headers.hpp 
 
-    template<Proto p>
-    auto header() const;
+    template<hdr h>
+    auto get() const {
+        if constexpr (h == hdr::ether) return header<hdr::ether>(m_ether );  // Controlla da qui!
+        if constexpr (h == hdr::vlan)  return header<hdr::vlan>(m_vlan );
+        if constexpr (h == hdr::arp)   return header<hdr::arp>(m_arp );
+        if constexpr (h == hdr::ipv4)  return header<hdr::ipv4>(m_ipv4 );
+        if constexpr (h == hdr::icmp)  return header<hdr::icmp>(m_icmp );
+        if constexpr (h == hdr::udp)   return header<hdr::udp>(m_udp );
+        if constexpr (h == hdr::tcp)   return header<hdr::tcp>(m_tcp );
+    }
 
     // Boolean methods to check if the frame carries the protocol p
     // Methods that check it the packet carries specific protocols..
 
-    template <Proto p>
-    bool is() const;
+    template <hdr h>
+    bool has() const
+    {
+        if constexpr (h == hdr::ether)  return (m_ether != nullptr);
+        if constexpr (h == hdr::vlan)   return (m_vlan != nullptr);
+        if constexpr (h == hdr::arp)    return (m_arp != nullptr);
+        if constexpr (h == hdr::ipv4)   return (m_ipv4 != nullptr);
+        if constexpr (h == hdr::icmp)   return (m_icmp != nullptr);
+        if constexpr (h == hdr::udp)    return (m_udp != nullptr);
+        if constexpr (h == hdr::tcp)    return (m_tcp != nullptr);
+    }
 
 };
 
 
-// Get pointers to header
-// Methods that return the raw pointer to C headers
-template<>
-inline auto frame::get<ether>() const
-{
-    return m_ether;
-}
-
-template<>
-inline auto frame::get<vlan>() const
-{
-    return m_vlan;
-}
-
-template<>
-inline auto  frame::get<arp>() const
-{
-    return m_arp;
-}
-template<>
-
-inline auto  frame::get<ipv4>() const
-{
-    return m_ipv4;
-}
-
-template<>
-inline auto  frame::get<icmp>() const
-{
-    return m_icmp;
-}
-
-template<>
-inline auto  frame::get<tcp>() const
-{
-    return m_tcp;
-}
-
-template<>
-inline auto  frame::get<udp>() const
-{
-    return m_udp;
-}
+} // end namespace npl
 
 
-// Methods that extract the specified header
-
-template<>
-inline auto frame::header<ether>() const
-{
-    return pktheader<ether>(m_ether);
-}
-
-template<>
-inline auto  frame::header<vlan>() const
-{
-    return pktheader<vlan>(m_vlan);
-}
-
-template<>
-inline auto  frame::header<arp>() const
-{
-    return pktheader<arp>(m_arp);
-}
-
-template<>
-inline auto  frame::header<ipv4>() const
-{
-    return pktheader<ipv4>(m_ipv4);
-}
-
-template<>
-inline auto  frame::header<icmp>() const
-{
-    return pktheader<icmp>(m_icmp);
-}
-
-template<>
-inline auto  frame::header<tcp>() const
-{
-    return pktheader<tcp>(m_tcp);
-}
-
-template<>
-inline auto  frame::header<udp>() const
-{
-    return pktheader<udp>(m_udp);
-}
-
-
-// Boolean methods to check if the frame carries the protocol p
-// Methods that check it the packet carries specific protocols..
-
-
-
-template<>
-inline bool  frame::is<ether>() const
-{
-    return (m_ether != nullptr);
-}
-
-template<>
-inline bool  frame::is<vlan>() const
-{
-    return (m_vlan != nullptr);
-}
-
-template<>
-inline bool  frame::is<arp>() const
-{
-    return (m_arp != nullptr);
-}
-
-template<>
-inline bool  frame::is<ipv4>() const
-{
-    return (m_ipv4 != nullptr);
-}
-
-template<>
-inline bool  frame::is<icmp>() const
-{
-    return (m_icmp != nullptr);
-}
-
-template<>
-inline bool  frame::is<tcp>() const
-{
-    return (m_tcp != nullptr);
-}
-
-template<>
-inline bool  frame::is<udp>() const
-{
-    return (m_udp != nullptr);
-}
-
-
-
-
-
-} // end of namespace npl
 
 
 
