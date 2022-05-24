@@ -34,9 +34,12 @@ add_executable(simpleUDPclient-json src/simpleUDPclient-json.cpp)
 add_executable(byteorder src/byteorder.cpp)
 target_link_libraries(UDProom -pthread)
 target_link_libraries(simpleTCP-mt-server -pthread)
+target_link_libraries(pcap-flow-counter -pthread)
 
 if (LINUX)
     target_compile_options(pcap_sniff PRIVATE -fconcepts)
+    target_compile_options(pcap-counter PRIVATE -fconcepts)
+    target_compile_options(pcap-flow-counter PRIVATE -fconcepts)
 endif()
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
