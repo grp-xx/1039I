@@ -3,7 +3,7 @@
 #include <iostream>
 #include <pcap/pcap.h>
 #include <string>
-#include <sys/_types/_u_char.h>
+#include <sys/types.h>
 
 template<typename T>
 void fun(u_char* user, const pcap_pkthdr* phdr, const u_char* ptr)
