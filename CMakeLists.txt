@@ -37,6 +37,7 @@ target_link_libraries(simpleTCP-mt-server -pthread)
 target_link_libraries(pcap-flow-counter -pthread)
 
 if (LINUX)
+#    may need to uncomment if using not very last versions of gcc/clang compilers
 #    target_compile_options(pcap_sniff PRIVATE -fconcepts)
 #    target_compile_options(pcap-counter PRIVATE -fconcepts)
 #    target_compile_options(pcap-flow-counter PRIVATE -fconcepts)
