@@ -312,7 +312,8 @@ public:
     unsigned short 
     hlen() const
     {
-        return static_cast<unsigned short>(chdr.ip_hl);
+        // Returns the IP header length in bytes
+        return static_cast<unsigned short>(chdr.ip_hl*4);
     }
 
     unsigned short 
@@ -434,6 +435,12 @@ public:
         return ntohs(chdr.th_dport);
     }
 
+    unsigned short 
+    hlen() const
+    {
+        // Returns the IP header length in bytes
+        return static_cast<unsigned short>(chdr.th_off*4);
+    }
 };
 
 
