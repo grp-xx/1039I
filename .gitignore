@@ -24,6 +24,7 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 Traces/
+Exams/2022-07-18
 
 ### Binary Files ###
 main
