@@ -24,7 +24,8 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 Traces/
-exams/2022-07-18
+exams/2022-07-18/client.cpp
+exams/2022-07-18/server.cpp
 
 ### Binary Files ###
 main
